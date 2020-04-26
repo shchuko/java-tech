@@ -15,3 +15,5 @@ fi;
 echo "Starting tests, command: ${RUN_TEST_COMMAND}"
 cd "$BIN_ROOT" || (echo "Bin root not found" && exit 1);
 eval "$RUN_TEST_COMMAND"
+
+git clean -f -d;
