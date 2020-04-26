@@ -1,3 +1,5 @@
+#!/bin/env bash
+
 TASK_SRC_DIR="$1";
 BIN_ROOT="$2";
 JAVAC_COMPILE_FLAGS="$3";
