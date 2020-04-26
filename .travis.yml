@@ -1,0 +1,6 @@
+language: java
+
+sudo: required
+
+script:
+  ./run_tests.sh
