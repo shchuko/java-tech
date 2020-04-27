@@ -1,21 +1,20 @@
 #!/bin/env bash
 
-TASK_SRC_DIR="$1";
-BIN_ROOT="$2";
-JAVAC_COMPILE_FLAGS="$3";
-RUN_TEST_COMMAND="$4";
-TEST_NAME="$5";
+TEST_NAME="$1";
+TASK_SRC_DIRS="$2";
+BIN_ROOT="$3";
+JAVAC_COMPILE_FLAGS="$4";
+RUN_TEST_COMMAND="$5";
 PROJECT_ROOT_DIR="$PWD";
 
-echo;
 echo "######################################";
 echo "Exec test: $TEST_NAME";
 
-if [[ -z $TASK_SRC_DIR ]]; then
+if [[ -z $TASK_SRC_DIRS ]]; then
     echo "Task sources path is empty";
     exit 1;
 else
-    echo "Task sources path: $TASK_SRC_DIR";
+    echo "Task sources dirs: $TASK_SRC_DIRS";
 fi;
 
 if [[ -z $BIN_ROOT ]]; then
@@ -28,10 +27,18 @@ fi;
 
 echo "-------------------------";
 echo "Compiling, javac flags: $JAVAC_COMPILE_FLAGS";
+
+SRC_DIRS_ARRAY=$(echo "$TASK_SRC_DIRS" |  tr "," " ");
+for SOURCE_DIR in $SRC_DIRS_ARRAY; do
+  JAVA_SOURCES_LIST="$(find "$SOURCE_DIR/" -name "*.java") $JAVA_SOURCES_LIST";
+done;
+
 if [[ -z $JAVAC_COMPILE_FLAGS ]]; then
-  javac -d "$BIN_ROOT" "$(find "$TASK_SRC_DIR/"  -name "*.java")";
+  # shellcheck disable=SC2086
+  javac -d $BIN_ROOT $JAVA_SOURCES_LIST;
 else
-  javac -d "$BIN_ROOT" "$JAVAC_COMPILE_FLAGS" "$(find "$TASK_SRC_DIR/"  -name "*.java")";
+  # shellcheck disable=SC2086
+  javac -d $BIN_ROOT $JAVAC_COMPILE_FLAGS $JAVA_SOURCES_LIST;
 fi;
 
 echo "-------------------------";

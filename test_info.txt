@@ -1,2 +1,5 @@
-./src/com/shchuko/walk:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.walk Walk com.shchuko.walk.Walk:Walk
+# To compile sources & run tests pass:
+# SOURCES_DIR_1,SOURCES_DIR_2:BUILD_OUT_DIR:JAVAC_FLAGS:EXEC_TESTS_COMMAND:TEST_NAME
 
+WalkTest:./src/com/shchuko/walk:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.walk Walk com.shchuko.walk.Walk
+#ImplementorAdvancedTest:./src/com/shchuko/implementor,./src/info/kgeorgiy/java/advanced/implementor:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.implementor advanced com.shchuko.implementor.Implementor
