@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Author: Vladislav Yaroshchuk
+# Website: github.com/shchuko
+
 TESTS_INFO_PATH="./test_info.txt";
 
 sed "s/#.*$//g" "$TESTS_INFO_PATH" |

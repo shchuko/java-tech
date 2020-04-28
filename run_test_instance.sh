@@ -1,5 +1,8 @@
 #!/bin/env bash
 
+# Author: Vladislav Yaroshchuk
+# Website: github.com/shchuko
+
 TEST_NAME="$1";
 TASK_SRC_DIRS="$2";
 BIN_ROOT="$3";

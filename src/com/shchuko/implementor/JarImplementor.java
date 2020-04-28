@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
@@ -26,28 +28,47 @@ public class JarImplementor extends Implementor implements JarImpler {
 
     }
 
-    /**
-     * Implement class for its name, zip it to JAR
-     *
-     * @param args First argument - full class name to implement, Second argument - output Jar file path
-     */
     public static void main(String[] args) {
-        if (args.length == 0 || args[0] == null) {
-            System.err.println("Wrong args");
+        if (args.length != 2 && args.length != 3) {
+            System.err.println("Expected 2 or 3 arguments, given " + args.length);
             System.exit(1);
         }
 
-        try {
-            Path path = (args.length == 1 || args[1] == null) ? Paths.get("") : Paths.get(args[1]);
-            new JarImplementor().implement(Class.forName(args[0]), path.toAbsolutePath());
-        } catch (ClassNotFoundException e) {
-            System.err.println("Implementation error caused: couldn't found class " + args[0]);
-            System.exit(1);
-        } catch (ImplerException e) {
-            System.err.println("Implementation error caused: " + e);
+        if (Arrays.stream(args).anyMatch(Objects::isNull)) {
+            System.err.println("Arguments cannot be null");
             System.exit(1);
         }
+
+        boolean implementJar = false;
+        if (args.length == 3) {
+            if ("-jar".equals(args[0].trim())) {
+                implementJar = true;
+                System.out.println("Packing result into JAR");
+            } else {
+                System.err.println("Unknown command: " + args[0]);
+                System.exit(1);
+            }
+        }
+
+        JarImplementor implementor = new JarImplementor();
+        try {
+            if (implementJar) {
+                implementor.implementJar(Class.forName(args[1]), Paths.get(args[2]).toAbsolutePath());
+            } else {
+                implementor.implement(Class.forName(args[0]), Paths.get(args[1]).toAbsolutePath());
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("Implementation error caused: couldn't found class " + e.getMessage());
+            System.exit(1);
+        } catch (ImplerException e) {
+            System.err.println("Implementation error caused: " + e.getMessage());
+            System.exit(1);
+        }
+
+        System.out.println("Implementation succeed");
+        System.exit(0);
     }
+
 
     /**
      * Produces <tt>.jar</tt> file implementing class or interface specified by provided <tt>token</tt>.
@@ -55,7 +76,7 @@ public class JarImplementor extends Implementor implements JarImpler {
      * Generated class classes name should be same as classes name of the type token with <tt>Impl</tt> suffix
      * added.
      *
-     * @param token type token to create implementation for.
+     * @param token   type token to create implementation for.
      * @param jarFile target <tt>.jar</tt> file.
      * @throws ImplerException when implementation cannot be generated.
      */
