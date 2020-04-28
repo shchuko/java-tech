@@ -3,7 +3,6 @@ package com.shchuko.implementor;
 import info.kgeorgiy.java.advanced.implementor.Impler;
 import info.kgeorgiy.java.advanced.implementor.ImplerException;
 
-import java.awt.image.ImagingOpException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,15 +37,23 @@ public class Implementor implements Impler {
     /**
      * Implement class for its name
      *
-     * @param args First argument - full class name to implement
+     * @param args First argument - full class name to implement, Second argument - output root directory
      */
     public static void main(String[] args) {
+        if (args.length == 0 || args[0] == null) {
+            System.err.println("Wrong args");
+            System.exit(1);
+        }
+
         try {
-            new Implementor().implement(Class.forName(args[0]), Paths.get("").toAbsolutePath());
+            Path path = (args.length == 1 || args[1] == null) ? Paths.get("") : Paths.get(args[1]);
+            new Implementor().implement(Class.forName(args[0]), path.toAbsolutePath());
         } catch (ClassNotFoundException e) {
             System.err.println("Implementation error caused: couldn't found class " + args[0]);
+            System.exit(1);
         } catch (ImplerException e) {
             System.err.println("Implementation error caused: " + e);
+            System.exit(1);
         }
     }
 
