@@ -7,10 +7,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,8 +80,7 @@ public class Implementor implements Impler {
         this.classImplShortName = token.getSimpleName() + "Impl";
         this.classPackageName = token.getPackage().getName();
         this.token = token;
-
-        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(getClassImplFile(token, root)))) {
+        try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(getClassImplFile(root)))) {
             writeFileHeader(writer);
             writeClassConstructors(writer);
             writeClassMethods(writer);
@@ -93,7 +90,7 @@ public class Implementor implements Impler {
         }
     }
 
-    private File getClassImplFile(Class<?> token, Path root) throws IOException {
+    private File getClassImplFile(Path root) throws IOException {
         Path fullPackagePath = root.resolve(classPackageName.replace('.', File.separatorChar));
         Files.createDirectories(fullPackagePath);
 
@@ -115,9 +112,25 @@ public class Implementor implements Impler {
     }
 
     private void writeClassHeader(OutputStreamWriter writer) throws IOException {
-        String classHeaderLine = "public class" + SPACE + classImplShortName + SPACE +
-                (token.isInterface() ? "implements" : "extends") + SPACE + token.getCanonicalName() + SPACE + "{" + EOL;
+        String classGenericParams;
+        String fatherGenericParams;
+
+        if (token.toGenericString().matches(".*<.*>.*")) {
+            classGenericParams = token.toGenericString().replaceAll(".*<", "<").replace(">.*", ">");
+            fatherGenericParams = parseGenericParamsNames(classGenericParams);
+        } else {
+            classGenericParams = "";
+            fatherGenericParams = "";
+        }
+
+       String classHeaderLine = "public class" + SPACE + classImplShortName + classGenericParams + SPACE +
+                (token.isInterface() ? "implements" : "extends") + SPACE + token.getCanonicalName() + fatherGenericParams + SPACE + "{" + EOL;
         writer.write(classHeaderLine);
+    }
+
+    private static String parseGenericParamsNames(String generic) {
+        return generic.replaceAll("\\s*extends.*?,", ", ")
+                .replaceAll("\\s*extends.*?>", ">");
     }
 
     private void writeClassConstructors(OutputStreamWriter writer) throws IOException, ImplerException {
@@ -173,11 +186,15 @@ public class Implementor implements Impler {
     private void writeExecutable(OutputStreamWriter writer, Executable executable) throws IOException {
         StringBuilder builder = new StringBuilder(TAB);
 
+        for (Annotation annotation : executable.getAnnotations()) {
+            builder.append(annotation.toString()).append(EOL).append(TAB);
+        }
+
         builder.append(getExecutableModifiers(executable));
 
         if (executable instanceof Method) {
             Method method = (Method) executable;
-            builder.append(method.getReturnType().getCanonicalName()).append(SPACE);
+            builder.append(getMethodReturnType(method)).append(SPACE);
             builder.append(method.getName());
         } else {
             builder.append(classImplShortName);
@@ -197,10 +214,46 @@ public class Implementor implements Impler {
         return mod == 0 ? "" : Modifier.toString(mod) + SPACE;
     }
 
+    private static String getMethodReturnType(Method method) {
+        Type genericReturnType = method.getGenericReturnType();
+        if (genericReturnType instanceof ParameterizedType) {
+            return genericReturnType.getTypeName();
+        }
+
+        if (genericReturnType.getClass() != Class.class) {
+            return "<" + genericReturnType + ">" + SPACE + genericReturnType;
+        }
+
+        return method.getReturnType().getCanonicalName();
+    }
+
     private static String getExecutableParameters(Executable executable, boolean onlyName) {
-        return Arrays.stream(executable.getParameters())
-                .map(param -> (onlyName ? "" : param.getType().getCanonicalName() + SPACE) + param.getName())
-                .collect(Collectors.joining(COMMA + SPACE, "(", ")"));
+        if (onlyName) {
+            return Arrays.stream(executable.getParameters())
+                    .map(Parameter::getName)
+                    .collect(Collectors.joining(COMMA + SPACE, "(", ")"));
+        }
+
+        StringBuilder builder = new StringBuilder();
+        Parameter[] parameters = executable.getParameters();
+
+
+        for (Parameter parameter : parameters) {
+            if (parameter.getParameterizedType() instanceof ParameterizedType) {
+                builder.append(parameter.getParameterizedType().getTypeName()).append(SPACE);
+            } else {
+                builder.append(parameter.getType().getCanonicalName()).append(SPACE);
+            }
+
+            builder.append(parameter.getName()).append(COMMA).append(SPACE);
+
+        }
+
+        if (builder.length() != 0) {
+            builder.delete(builder.length() - 2, builder.length());
+        }
+
+        return "(" + builder.toString() + ")";
     }
 
     private static String getExecutableExceptions(Executable executable) {
@@ -219,7 +272,8 @@ public class Implementor implements Impler {
 
     private static String getExecutableBody(Executable executable) {
         if (executable instanceof Method) {
-            return "return" + getDefaultTokenValue(((Method) executable).getReturnType()) + ";";
+            String returnToken = getDefaultTokenValue(((Method) executable).getReturnType());
+            return (returnToken.length() == 0) ? "" : "return" + returnToken + ";";
         } else {
             return "super" + getExecutableParameters(executable, true) + ";";
         }
