@@ -37,13 +37,20 @@ public class Walk {
     }
 
     private void runWalk() throws IOException {
-        openInputFile();
-        openOutputFile();
+        try {
+            openInputFile();
+            openOutputFile();
 
-        hashFilesList();
+            hashFilesList();
+        } finally {
+            if (inputStreamReader != null) {
+                inputStreamReader.close();
+            }
 
-        inputStreamReader.close();
-        outputStreamWriter.close();
+            if (outputStreamWriter != null) {
+                outputStreamWriter.close();
+            }
+        }
     }
 
     private void openInputFile() throws IOException {
