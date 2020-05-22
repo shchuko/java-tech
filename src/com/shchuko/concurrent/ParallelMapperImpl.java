@@ -103,7 +103,7 @@ public class ParallelMapperImpl implements ParallelMapper {
 
 class SynchronizedCounter {
     final int finishValue;
-    int value = 0;
+    volatile int value = 0;
 
     public SynchronizedCounter(int finishValue) {
         this.finishValue = finishValue;
