@@ -1,8 +1,10 @@
 # To compile sources & run tests pass:
-# SOURCES_DIR_1,SOURCES_DIR_2:BUILD_OUT_DIR:JAVAC_FLAGS:EXEC_TESTS_COMMAND:TEST_NAME
+# TEST_NAME:SOURCES_DIR_1,SOURCES_DIR_2:BUILD_OUT_DIR:JAVAC_FLAGS:EXEC_TESTS_COMMAND
 
-SumTest:./src/:./build/production/java-tech/lab1_2::java -jar SumTest.jar
-QueueToArrayTest:./src/queue:./build/production/java-tech/lab1_2::java -ea -jar QueueToArrayTest.jar
-AdvancedImplementorTest:./src/com/shchuko/implementor,./src/info/kgeorgiy/java/advanced/implementor:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.implementor advanced com.shchuko.implementor.Implementor
-AdvancedJarImplementorTest:./src/com/shchuko/implementor,./src/info/kgeorgiy/java/advanced/implementor:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.implementor jar-advanced com.shchuko.implementor.JarImplementor
+ScalarMapperTest:./src/com/shchuko/concurrent,./src/info/kgeorgiy/java/advanced/concurrent,./src/info/kgeorgiy/java/advanced/mapper:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.mapper scalar com.shchuko.concurrent.IterativeParallelism
+ScalarIPTest:./src/com/shchuko/concurrent,./src/info/kgeorgiy/java/advanced/concurrent,./src/info/kgeorgiy/java/advanced/mapper:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.concurrent scalar com.shchuko.concurrent.IterativeParallelism
 WalkTest:./src/com/shchuko/walk:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.walk Walk com.shchuko.walk.Walk
+AdvancedJarImplementorTest:./src/com/shchuko/implementor,./src/info/kgeorgiy/java/advanced/implementor:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.implementor jar-advanced com.shchuko.implementor.JarImplementor
+AdvancedImplementorTest:./src/com/shchuko/implementor,./src/info/kgeorgiy/java/advanced/implementor:./build/production/java-tech::java -cp . -p . -m info.kgeorgiy.java.advanced.implementor advanced com.shchuko.implementor.Implementor
+QueueToArrayTest:./src/queue:./build/production/java-tech/lab1_2::java -ea -jar QueueToArrayTest.jar
+SumTest:./src/:./build/production/java-tech/lab1_2::java -jar SumTest.jar
