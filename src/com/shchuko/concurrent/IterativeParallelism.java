@@ -50,8 +50,7 @@ public class IterativeParallelism implements ScalarIP {
      */
     @Override
     public <T> T minimum(int threads, List<? extends T> values, Comparator<? super T> comparator) throws InterruptedException {
-        Function<List<? extends T>, T> function = minList -> minList.stream().min(comparator).get();
-        return function.apply(runJob(threads, values, function));
+        return maximum(threads, values, comparator.reversed());
     }
 
     /**
@@ -80,8 +79,7 @@ public class IterativeParallelism implements ScalarIP {
      */
     @Override
     public <T> boolean any(int threads, List<? extends T> values, Predicate<? super T> predicate) throws InterruptedException {
-        Function<List<? extends T>, Boolean> function = val -> val.stream().anyMatch(predicate);
-        return runJob(threads, values, function).stream().anyMatch(val -> val);
+        return !all(threads, values, predicate.negate());
     }
 
     private <T> List<List<? extends T>> splitValues(int threads, List<? extends T> values) {

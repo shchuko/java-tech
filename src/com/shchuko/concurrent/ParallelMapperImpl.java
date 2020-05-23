@@ -13,8 +13,12 @@ public class ParallelMapperImpl implements ParallelMapper {
     private final Queue<Job<?, ?>> jobQueue = new LinkedList<>();
     private final List<Thread> threads = new ArrayList<>();
 
-    public ParallelMapperImpl(int threadCount) {
-        for (int i = 0; i < threadCount; ++i) {
+    public ParallelMapperImpl(int threadsNumber) {
+        if (threadsNumber < 1) {
+            throw new IllegalArgumentException("Illegal threads number " + threads);
+        }
+
+        for (int i = 0; i < threadsNumber; ++i) {
             threads.add(new Thread(new JobExecutor()));
         }
         threads.forEach(Thread::start);
@@ -25,7 +29,7 @@ public class ParallelMapperImpl implements ParallelMapper {
      * Mapping for each element performs in parallel.
      *
      * @param function function
-     * @param args args
+     * @param args     args
      * @throws InterruptedException if calling thread was interrupted
      */
     @Override
